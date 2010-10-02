@@ -41,6 +41,7 @@ Final version should depend on:
 On Posix only:
 
  - words (POSIX platforms support /usr/share/dict/words, windows does not.)
+   I.E. if you're packaging this for windows, a "words" file should be included.
 
 TODO:
 
