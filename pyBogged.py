@@ -33,7 +33,7 @@ class bogged:
 		self.grid   = [["A","B","C","D"],["E","F","G","H"],["I","J","K","L"],["M","N","O","P"]]
 		self.used   = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
 		# Original boggle chromosome:
-		#chromosome  = "HNWEEVLZNHNRLIXERDNEAGAEPOSCAHREYLVDCMTUIOSUNEEIFFPKASOOABBJHETRVWWATTOOTSYDITSEOSITHIMNUQTTYLER"
+		chromosome  = "HNWEEVLZNHNRLIXERDNEAGAEPOSCAHREYLVDCMTUIOSUNEEIFFPKASOOABBJHETRVWWATTOOTSYDITSEOSITHIMNUQTTYLER"
 		if not chromosome:
 			#213 generations optimized chromosome
 			#Score = 78.3 words on average.
@@ -453,6 +453,8 @@ Options:
 		config.set('pyBogged','Timer',repr(self.options_list["Timer"].get_active()))
 		config.set('pyBogged','Score',repr(self.options_list["Score"].get_active()))
 		config.set('pyBogged','Words',repr(self.options_list["Words"].get_active()))
+		config.set('pyBogged','Misses',repr(self.options_list["Misses"].get_active()))
+		config.set('pyBogged','Repeats',repr(self.options_list["Repeats"].get_active()))
 		config.set('RunningTotals','games',repr(self.totalgames))
 		config.set('RunningTotals','score',repr(self.totalscore))
 		config.set('RunningTotals','possiblescore',repr(self.totalpossiblescore))
@@ -504,6 +506,8 @@ Options:
 			self.options_list["Timer"].set_active(config.getboolean('pyBogged', 'Timer'))
 			self.options_list["Score"].set_active(config.getboolean('pyBogged', 'Score'))
 			self.options_list["Words"].set_active(config.getboolean('pyBogged', 'Words'))
+			self.options_list["Repeats"].set_active(config.getboolean('pyBogged', 'Repeats'))
+			self.options_list["Misses"].set_active(config.getboolean('pyBogged', 'Misses'))
 			self.totalgames = config.getint('RunningTotals', 'games')
 			self.totalscore = config.getint('RunningTotals', 'score')
 			self.totalpossiblescore = config.getint('RunningTotals', 'possiblescore')
@@ -657,6 +661,22 @@ Options:
 		check.set_active(False)
 		check.show()
 		self.options_list["Score"]=check
+
+		hbox2 = gtk.HBox(False,0)
+		vbox2.pack_start(hbox2,False,True,0)
+		hbox2.show()
+
+		check=gtk.CheckButton("Misses")
+		hbox2.pack_start(check,False)
+		check.set_active(False)
+		check.show()
+		self.options_list["Misses"]=check
+
+		check=gtk.CheckButton("Repeats")
+		hbox2.pack_start(check,False)
+		check.set_active(False)
+		check.show()
+		self.options_list["Repeats"]=check
 
 
 		hbox2 = gtk.HBox(False,0)
