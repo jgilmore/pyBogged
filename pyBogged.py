@@ -424,7 +424,7 @@ Options:
 	def about(self, widget):
 		"""Display a brief about window"""
 		textMessage("""ByBogged was written by John Gilmore between 5/17/2010 and 5/24/2010. The inspiration for the word-finding algorythm is borrowed from bogged, written in tcl/tk by Todd David Rudick. I rewrote it in python, creating a GTK user interface, Qu as one tile, guest mode, game logging for later graphing and so forth.
-	I borrowed the genetic algorythm for dice generation from some python recipes site somewhere, and added a class at the bottom to apply it to the dice set. The hard part there was comming up with a good criteria for a good set of dice. Feel free to come up with different criteria for what is good, and evolve your own set of dice.""","About","About pyBogged V1.0")
+	I borrowed the genetic algorythm for dice generation from some python recipes site somewhere, and added a class at the bottom to apply it to the dice set. The hard part there was coming up with a good criteria for a good set of dice. Feel free to come up with different criteria for what is good, and evolve your own set of dice.""","About","About pyBogged V1.0")
 
 	def exit(self, widget):
 		"""Display a confirmation dialogue, and quit. 
@@ -607,6 +607,7 @@ Options:
 		entry.select_region(0, len(entry.get_text()))
 		entry.connect("activate", self.addword)
 		entry.connect("changed", self.checkentry)
+		entry.set_tooltip_text("Type your word here. You'll not be able to type things in that can't be found in the grid above. And only dictionary words can actually be added to the list. You can also click the letters above to add them, one by one, to this box")
 		vbox2.pack_start(entry, False, True, 0)
 		entry.show()
 		self.entry=entry
@@ -619,12 +620,14 @@ Options:
 		button = gtk.Button("_Add word to list")
 		button.connect("clicked", self.addword)
 		hbox2.pack_start(button, False, True, 0)
+		button.set_tooltip_text("Click to (try to) add the word to the list. Or just press \"enter\"")
 		button.show()
 		self.disable_list.append(button)
 		self.addwordbutton=button
 
 		button = gtk.Button("Clear")
 		button.connect("clicked", self.clear)
+		button.set_tooltip_text("Click to clear the \"Word\" box.")
 		hbox2.pack_start(button, False, True, 0)
 		button.show()
 
@@ -636,6 +639,7 @@ Options:
 		hbox2.pack_start(check,False)
 		check.set_active(True)
 		check.show()
+		check.set_tooltip_text("Check this box for a timed game. Timer is for 3 minutes.")
 		self.options_list["Timer"]=check
 
 		self.timercheckbox=check
@@ -644,6 +648,7 @@ Options:
 		hbox2.pack_start(check,False)
 		check.set_active(True)
 		check.show()
+		check.set_tooltip_text("Check this box to show the number of dictionary words that can be found (max) in this game. It will also display a percentage, showing how many of those words you've found so far.")
 		self.options_list["Words"]=check
 
 		hbox2 = gtk.HBox(False,0)
@@ -654,12 +659,14 @@ Options:
 		hbox2.pack_start(check,False)
 		check.set_active(False)
 		check.show()
+		check.set_tooltip_text("The game keeps statistics - what your average percentage of found words is, for example. If this box is checked, then this game won't count towards you totals, and in fact won't be recorded at all.")
 		self.options_list["Guest"]=check
 
 		check=gtk.CheckButton("Alt. Scoring")
 		hbox2.pack_start(check,False)
 		check.set_active(False)
 		check.show()
+		check.set_tooltip_text("Check this box to count \"score\" instead of simply counting workds. Each word is worth it's length, minus two. So three letter words are worth 1 point, four letter words worth 2, etc. Misses are repeated words may optionally be deducted from your score.")
 		self.options_list["Score"]=check
 
 		hbox2 = gtk.HBox(False,0)
@@ -670,12 +677,14 @@ Options:
 		hbox2.pack_start(check,False)
 		check.set_active(False)
 		check.show()
+		check.set_tooltip_text("If alt. Scoring is checked, and this box is checked, a point will be deducted from your score for each \"word\" you enter that isn't in the dictionary.")
 		self.options_list["Misses"]=check
 
 		check=gtk.CheckButton("Repeats")
 		hbox2.pack_start(check,False)
 		check.set_active(False)
 		check.show()
+		check.set_tooltip_text("If alt. Scoring is checked, and this box is checked, a point will be deducted from you score for each word you enter that is already in the list")
 		self.options_list["Repeats"]=check
 
 
@@ -697,6 +706,7 @@ Options:
 		text=gtk.TextView()
 		text.set_editable(False)
 		text.set_wrap_mode(gtk.WRAP_WORD)
+		text.set_tooltip_text("This lists all the words you've found in this game, in alphabetical order. After you give up, you'll be shown all the words you could have found but didn't as well. They're the ones in red.")
 		vbox2.pack_start(text)
 		text.show()
 
@@ -719,12 +729,14 @@ Options:
 		button = gtk.Button("_Start Game")
 		button.connect("clicked", self.startgame)
 		hbox.pack_start(button, True, True, 0)
+		button.set_tooltip_text("Start a new game. Options cannot be changed once the game is started, so make sure they're right.")
 		button.show()
 		self.startgamebutton=button
 
 		button = gtk.Button("_Give Up")
 		button.connect("clicked", self.giveup)
 		hbox.pack_start(button, True, True, 0)
+		button.set_tooltip_text("Had enough? Give up! Then we'll show you all the words you missed!")
 		button.show()
 		self.disable_list.append(button)
 
