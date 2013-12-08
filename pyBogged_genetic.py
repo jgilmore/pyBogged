@@ -1,6 +1,15 @@
 #!/usr/bin/env python
-# genetic.py
-#
+"""pybogged: A word game implemented with pyGTK
+This is the genetic algo that was used to create the set of dice. It started with randomness,
+and based on a fitness algo ended up with something at least half decent.
+
+To adjust the fitness algo (and thus end up with something different) look at the "evaluate" function in "setadice"
+and look at the "freqmulti" definition in the "step" function.
+"""
+__version__ = "1.5"
+__author__ = "John Gilmore"
+__copyright__ = "(C) 2010,2012 John Gilmore. GNU GPL v3 or later."
+__contributors__ = []
 
 import random
 import pickle		
@@ -134,6 +143,7 @@ class Environment(object):
 		self.population = next_population[:self.size]
 
 	def _select(self):
+
 		"override this to use your preferred selection method"
 		return self._tournament()
 	
@@ -161,9 +171,10 @@ class Environment(object):
 	best = property(**best())
 
 	def report(self):
-		print "="*70
-		print "generation: ", self.generation
-		print "best:		", self.best
+		print
+		#print "="*70
+		#print "generation: ", self.generation
+		#print "best:		", self.best
 
 
 """
@@ -176,7 +187,7 @@ class setadice(Individual):
 	def __init__(self,chromosome=None):
 		"""Setup of length, optimization type, making chromosome from string, etc"""
 		self.optimization = MAXIMIZE
-		self.length=16*6
+		self.length=25*6
 		self.alleles="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		self.score=0
 		if type(chromosome) == type(""):
@@ -225,34 +236,26 @@ class setadice(Individual):
 				print "e"+"".join(chromosome)
 				self.chromosome=chromosome
 
-	def addallwords(self,words):
+	def addallwords(self,words,multipliers):
 		self.allwords = 0
 		for word,count in self.words.iteritems():
 			freq = words[word]
-			if freq == 1:
-				#Unique words are worth 6 points each
-				self.allwords += 6 * count
-			elif freq < 5:
-				#If there's two, their worth 3 points each
-				self.allwords += 5 * count
-			elif freq < 10:
-				#If there's three, two points each
-				self.allwords += 4 * count
-			elif freq < 18:
-				#Less that fifteen? 1 point each
-				self.allwords += 2 * count
-			else:
-				#More than five? minus one point each
-				self.allwords -= 2 * count
-		self.score = self.lowestscore + self.lowscore + self.average/2 + self.allwords/15 - self.penalties
-		max=230
-		if self.highscore > max:
-			self.score -= (self.highscore - max) * 2
-		if self.highestscore > max:
-			self.score -= (self.highestscore - max) * 2
+			for x,y in multipliers:
+				if freq < x:
+					self.allwords += y * count
+					break
+		self.score = (self.lowestscore + self.lowscore)*10 + self.average*2 + self.allwords/10 - self.penalties
+		#max=230
+		#if self.highscore > max:
+		#	self.score -= (self.highscore - max) * 2
+		#if self.highestscore > max:
+		#	self.score -= (self.highestscore - max) * 2
 
+	def applypenalty(self, count, limit, penalty):
+		if count > limit:
+			self.penalties += (count-limit) * penalty
 	def evaluate(self,optimum=None):
-		"""Generates 30 new games, and adds the scores. Also standardizes the chromosomes"""
+		"""Generates 30 new games, and adds the scores. NOT COMPLETE. see also "add all words" which weights the words according to frequency. Also standardizes the chromosomes"""
 		# To make things more interesting, penalize for:
 		#	more than nine of any letter
 		#	more than five letters which have only one
@@ -267,8 +270,8 @@ class setadice(Individual):
 		self.freq="".join(freq)
 
 
-		words={}
 		scores=[]
+		words={}
 		t=pyBogged.bogged(self.chromosome)
 		#Run 30 games
 		for i in range(30):
@@ -283,21 +286,22 @@ class setadice(Individual):
 			scores.append(thisscore)
 
 		self.penalties=0
-		if self.freq.count("1") > 7:
-			self.penalties += (self.freq.count("1")-7) * 22
-		self.penalties += self.freq.count("0") * 80
-		self.penalties += self.freq.count("B") * 6
-		self.penalties += self.freq.count("C") * 12
-		self.penalties += self.freq.count("D") * 24
-		self.penalties += self.freq.count("E") * 48
-		self.penalties += self.freq.count("F") * 96
-		self.penalties += self.freq.count("G") * 192
-		self.penalties += self.freq.count("H") * 192 * 2
-		self.penalties += self.freq.count("I") * 192 * 4
-		self.penalties += self.freq.count("J") * 192 * 5
-		self.penalties += self.freq.count("K") * 192 * 6
-		self.penalties += self.freq.count("L") * 192 * 7
-		self.penalties += self.freq.count("M") * 192 * 8 
+		self.applypenalty(self.freq.count("0"),0,9000) #Kill any chromosome that's lacking an allel (sets must have at least one of each letter)
+		self.applypenalty(self.freq.count("1"),7,700) #Too many letters with just one are bad
+		self.applypenalty(self.freq.count("1")+self.freq.count("2"),9,700)
+		self.applypenalty(self.freq.count("1")+self.freq.count("2")+self.freq.count("3"),11,700)
+		#self.penalties += self.freq.count("B") * 6
+		#self.penalties += self.freq.count("C") * 12
+		#self.penalties += self.freq.count("D") * 24
+		#self.penalties += self.freq.count("E") * 48
+		#self.penalties += self.freq.count("F") * 96
+		#self.penalties += self.freq.count("G") * 192
+		#self.penalties += self.freq.count("H") * 192 * 2
+		#self.penalties += self.freq.count("I") * 192 * 4
+		#self.penalties += self.freq.count("J") * 192 * 5
+		#self.penalties += self.freq.count("K") * 192 * 6
+		#self.penalties += self.freq.count("L") * 192 * 7
+		#self.penalties += self.freq.count("M") * 192 * 8 
 
 		self.average=sum(scores)/len(scores)
 		scores.sort()
@@ -306,7 +310,8 @@ class setadice(Individual):
 		self.highestscore=scores.pop()
 		self.highscore=scores.pop()
 		self.words=words
-
+		
+		#Set score. But note that this is COMPLETLY overridded in addwords...
 		self.score = self.lowestscore + self.lowscore + self.average/2 - self.penalties
 		return self.score	
 
@@ -339,19 +344,12 @@ def load():
 		print "Evolution will be started with random chromosomes."
 		print "="*70
 
-def report():
-	"""Prints the entire population, in a useful format.."""
-	print env.population[0].alleles, "Chromosome".ljust(len(env.population[0].chromosome)),"Score"
-	for die in env.population:
-		dice = []
-		for i in range(16):
-			dice.append("".join(die.chromosome[i*6:(i+1)*6]))
-		chromosome="-".join(dice)
-		print die.freq,chromosome,die.lowscore,die.highscore,die.penalties,die.allwords,round(die.average),round(die.score,1)
-
 def step():
-	"""This step re-evalutated even the 'Best', preventing a lucky fluke score from dominating for generations"""	
+	"""Step the environment, apply word frequency bonuses (and penalties) and print a nice report"""
 	global env
+	#Freqmult: tuples are break point, reward points per word * 10. Will be awarded for words with less
+	#than X occurances across 30 games each of 50 dice sets.
+	freqmult=[(5,50),(10,25),(30,10),(90,0),(8000,-10)]
 	if env==None:
 		env=Environment(setadice,size=50,mutation_rate=0.03, crossover_rate=0.10)
 	env.step()
@@ -368,7 +366,20 @@ def step():
 				words[word]=count
 	#Apply global word freq prefs
 	for die in env.population:
-		die.addallwords(words)
+		die.addallwords(words,freqmult)
+	env.population.sort()
+	#Print report
+	print "="*70
+	print "generation: ", env.generation
+	print "best:"+"".join(env.population[0].chromosome)
+	print env.population[0].alleles, " lowscore, highscore, penalties, word freq penalties,average, overall"
+	for die in env.population:
+		dice = []
+		for i in range(16):
+			dice.append("".join(die.chromosome[i*6:(i+1)*6]))
+		chromosome="-".join(dice)
+		print die.freq,die.lowscore,die.highscore,die.penalties,die.allwords,round(die.average),round(die.score,1)
+
 	#Print out word freq info.
 	wordfreq={}
 	sortedwords=[]
@@ -377,12 +388,18 @@ def step():
 			wordfreq[count]=1
 		else:
 			wordfreq[count]+=1
-		if count > 70:
+		if count > 90:
 			sortedwords.append(word)
-	sortedwords.sort()
+	for count,reward in freqmult:
+		j=0
+		for freq,number in wordfreq.iteritems():
+			if freq<count:
+				j+=reward*number
+		print( str(j)+" points awarded (at "+str(reward/10)+" each) for words with less than "+str(count)+" frequency")
+	
+	print sortedwords.sort()
+	print "This is the word frequencies, starting with most frequent. (frequency, count of different words with that frequency)"
 	print sorted(wordfreq.iteritems())
-	env.population.sort()
-	report()
 
 def botched_load():
 		global env
@@ -443,7 +460,7 @@ def main():
 	print "1 generation will take about 3-10 minutes, and a (wide) report will be printed after each generation"
 	print "The current state is saved after each generation, so the process can be interrupted and restarted."
 	load()
-	for a in range(100):
+	while True:
 		step()
 		save()
 	return 0

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """pybogged: A word game implemented with pyGTK"""
-__version__ = "1.0"
+__version__ = "1.5"
 __author__ = "John Gilmore"
-__copyright__ = "(C) 2010 John Gilmore. GNU GPL v3 or later."
+__copyright__ = "(C) 2010,2012 John Gilmore. GNU GPL v3 or later."
 __contributors__ = []
 
 #These are in the pytho9n standard library
@@ -25,19 +25,12 @@ class bogged:
 	"""Basic bogged rules engine & dice tracker"""
 	def __init__(self,chromosome=None):
 		"""Set dice set description,etc"""
-		random.seed()
 		self.maxwords=0
 		self.words  = []
-		self.width  = 4
-		self.height = 4
-		self.grid   = [["A","B","C","D"],["E","F","G","H"],["I","J","K","L"],["M","N","O","P"]]
-		self.used   = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-		# Original boggle chromosome:
-		chromosome  = "HNWEEVLZNHNRLIXERDNEAGAEPOSCAHREYLVDCMTUIOSUNEEIFFPKASOOABBJHETRVWWATTOOTSYDITSEOSITHIMNUQTTYLER"
 		if not chromosome:
 			#213 generations optimized chromosome
 			#Score = 78.3 words on average.
-			#chromosome = "OTZEEAYBYSBPPXMEEOKRARSDARECAPUJSRWSLNITVANOSDAAKYASNSREWBBOTYLWWEFWSQSAEGHNTAMLLNEDNAUTOPEUTESU"
+			chromosome = "OTZEEAYBYSBPPXMEEOKRARSDARECAPUJSRWSLNITVANOSDAAKYASNSREWBBOTYLWWEFWSQSAEGHNTAMLLNEDNAUTOPEUTESU"
 			#This one was evolved with lighter "missing a letter" penaties, and heavier "to many of one char"
 			#and "to many only one of X" penalties. Also higher weight for long words.
 			#chromosome = "SARDOSTXMVZYGPLNLQSRTOBCOGLOANHJLNOTLNRSRETOSLAIEMRQERGEWAAOEKKPATFWUBUDTSHESEILETRRSEPRYQWSLEEU"
@@ -46,28 +39,41 @@ class bogged:
 			#Generation=368, added penalty for really small number of words.
 			#chromosome = "ABTEWLTIEEVAURXIRSTAREELOVZSSNEOQEEDTSBERTPLOODIGLSSESYUATHMNRAAIRTWODOSLKHDLLJATTCGSRLFMNAPASAY"
 			#Generation=377, decided to use computer for something else, I'll stop here most likely.
-			chromosome = "AOTEWLTIOETAURRISSVAXEELDDZSRNEEQPDDSSWARTALOOEITLSESZYUETHMNRAGIRTLBVOSLKHOLLJAATCGSTLFMNAPRSEY"
-			chromosome = "ABFSZTTEEQEHKWTNUJSCRAFTISASICRDGRTSAAEVIAOGTRSREAZDRVTISACEXESPEEYROEEIDFATEMBLSEEESTQELSLISIPI"
+			#chromosome = "AOTEWLTIOETAURRISSVAXEELDDZSRNEEQPDDSSWARTALOOEITLSESZYUETHMNRAGIRTLBVOSLKHOLLJAATCGSTLFMNAPRSEY"
+			#chromosome = "ABFSZTTEEQEHKWTNUJSCRAFTISASICRDGRTSAAEVIAOGTRSREAZDRVTISACEXESPEEYROEEIDFATEMBLSEEESTQELSLISIPI"
 			#chromosome = "AEEPFERSSITPLEEIQEBESRFTBOISUTTDVQTCZRADIDENESIATTLTREVEUSSADAHSWKRRSSAAELIXRRZGIRIGCCOETEMETJYR"
 			#Generation = 166, starting from zero with an all-new fitness algo.
-			chromosome = "SJPONNSBANDEEAROUNHESZDTEDEKMSTTYEODSLTALUALEGLLHMQSBMRPFLNLSTAPSVEDWTTAASICEXOZGADSRLEPOHEICPEH"
+			#chromosome = "SJPONNSBANDEEAROUNHESZDTEDEKMSTTYEODSLTALUALEGLLHMQSBMRPFLNLSTAPSVEDWTTAASICEXOZGADSRLEPOHEICPEH"
 			#ABCDEFGHIJKLMNOPQRSTUVWXYZ
 			#8226B1242118355513A7212112
-			chromosome = "LLRONWSBRNKDPAXTUNHSZSHNETCDZSTEYEMESFTAHDVLMDJLAMSTOPELTDALSBDPSSTAEGPEAEICNSOAGEQLALEROUEIWPOH"
+			#chromosome = "LLRONWSBRNKDPAXTUNHSZSHNETCDZSTEYEMESFTAHDVLMDJLAMSTOPELTDALSBDPSSTAEGPEAEICNSOAGEQLALEROUEIWPOH"
 			#Generation 350 of a new algorythm that punishes for lots of really common words, and punishes for 
 			#more than 200 words in the max words of 30 game.
 			#least32 greatest152 penalties0 words-456 average78.0 score68.0
 			#ABCDEFGHIJKLMNOPQRSTUVWXYZ
 			#A3236133416267A22463113223 
-			chromosome = "RSQJADAENAOAAKYSNBDOMOCNNOQMMXZSOZZKAAOUIHKNOPGKOBTSTYHCMNSEKHGIOERMEISAWGNWOVARBREXKWTDLAMFILEP"
+			#chromosome = "RSQJADAENAOAAKYSNBDOMOCNNOQMMXZSOZZKAAOUIHKNOPGKOBTSTYHCMNSEKHGIOERMEISAWGNWOVARBREXKWTDLAMFILEP"
 			#Lest, Greatest, Penalties, Words, Average, Score
 			#27 204 0 712 95.0 134.0
 			#ABCDEFGHIJKLMNOPQRSTUVWXYZ
 			#5252A512813353952482323111 
-			chromosome = "FIFHOSGPIOOCNMIPAWLMOAENLSKBRRJBECAFMIKEVEMCARXEITFLCFIQIVWCYOEUEORUUOOSQSIEDAPKSNDWESPMSTPZEHSO"
-			chromosome = "OSFIEELUCDKARHPGCFSNXRWNCRGIAEYSROIEBDEIADYWTQCKSSVSIGAEAOWBOTABERPSLEJMUUGZIETMAVLCTVESPKFZOOWD"
+			#chromosome = "FIFHOSGPIOOCNMIPAWLMOAENLSKBRRJBECAFMIKEVEMCARXEITFLCFIQIVWCYOEUEORUUOOSQSIEDAPKSNDWESPMSTPZEHSO"
 
 
+		if len(chromosome) == 16*6:
+			#Chomosome length indicates a 4x4 grid of six-sided dice
+			self.width  = 4
+			self.height = 4
+			self.grid   = [["A","B","C","D"],["E","F","G","H"],["I","J","K","L"],["M","N","O","P"]]
+			self.used   = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+		elif len(chromosome) == 25*6:
+			#Chomosome length indicates a 5x5 grid of six-sided dice
+			self.width  = 5
+			self.height = 5
+			self.grid   = [["A","B","C","D","E"],["F","G","H","I","J"],["K","L","M","N","O"],["P","Q","R","S","T"],["U","V","W","X","Y"]]
+			self.used   = [[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]]
+		else:
+			die("Bad chromosome detected:"+len(chromosome)+". Must be 16 or 25 six sided dice characters in length (either 96 or 150 chars)")
 		self.dice=[]
 		for index in range( self.width * self.height):
 			self.dice.append(chromosome[index*6:(index+1)*6])
@@ -124,7 +130,17 @@ class bogged:
 			#and just open it. It'll be a lot slower without grep winnowing out
 			#the good stuff, but it'll still work.
 			dictionary = open("words","r")
-			print("Get a real OS!")
+			print("Getting a real OS will significantly spead up this program!")
+		'''
+		global dictionary 
+		if 'dictionary' not in globals():
+			if os.name=='posix':
+				dictionary = open("/usr/share/dict/words","r").read()
+			else:
+				dictionary = open("words","r").read()
+			dictionary = dictionary.split()
+			dictionary[:] = [ word.strip().swapcase() for word in dictionary if len(word) and word.islower()]
+		'''
 		#Clear wordlist
 		self.words=[]
 		#Read from the above pipe, and for each word, call checkword and append to words list.
@@ -155,12 +171,7 @@ class bogged:
 			Note that this is called only at the start of a game as part of the
 			process of filling the self.words variable. Forever after, self.words
 			is used."""
-		#reject non-strings and zero length words
-		if type(word) != type("t"):
-			#print "rejected, not a string"
-			return 0
-		if not len(word):
-			#print "rejected, zero length"
+		if len(word) < 1:
 			return 0
 		#check that each letter combination exists in possible2letters
 		for x in range(len(word)-1):
@@ -275,21 +286,58 @@ class gtkbogged:
 		if len(self.words):
 			#Played a game, so record it.
 			self.save()
-		self.minutes=3
-		self.seconds=0
+		self.seconds= 0
+		self.missed = 0
+		self.repeats= 0
 		self.words  = []
 		self.ingame = True
 		self.saved  = False
 		self.gaveup = False
 		self.entry.set_text("")
+		if self.options_list["fivebyfiveoriginal"].get_active():
+			#ABCDEFGHIJKLMNOPQRSTUVWXYZ
+			#C156J435B1154BB41BAD412131 (Frequency, 0-9A-Z as numbers for the freq. of A-Z.)
+			# 19 E's, 7 with just 1, 1 with 2, 2 with 3, 4 with 4, 3 with 5, 
+			self.bogged=bogged("AAEEEEAEEEEMAAAFRSAEEGMUADENNNAAFIRSAEGMNNCEIILTCCENSTDHHLOR"\
+					         + "CEILPTDDHNOTDHLNORDHLNOREIIITTCEIPSTAFIRSYBJKQXZEMOTTTFIPSSYENSSSUGORRVWIPRRRYOOOTTUNOOTUW")
+		elif self.options_list["fourbyfouroriginal"].get_active():
+			self.bogged=bogged("AAEEGNABBJOOAFFKPSACHOPSDEILRXEEINSUEEHNVWCIMOTUHIMNQUDELRVYEIOSSTHLNNRZAOOTTWEHRTVWDISTTYELRTTY")
+		elif self.options_list["fourbyfour"].get_active():
+			self.bogged=bogged("OSFIEELUCDKARHPGCFSNXRWNCRGIAEYSROIEBDEIADYWTQCKSSVSIGAEAOWBOTABERPSLEJMUUGZIETMAVLCTVESPKFZOOWD")
+		elif self.options_list["fivebyfive"].get_active():
+			#self.bogged=bogged("EQUWAVFSEVLCROEMOTECEERTVEWPVSFNHTNSRKVOIPMECQENRYNULSJREADCWIORWEGIQWSTFFCICLLVNCIODFHRDAMESTNMVADKCGTQFRRWNORSWIRRMDTADRYNPEQRHEPROUWBMUZKPTEUDEUXLP")
+			#self.bogged=bogged("EMKTSVHIIOSKRODRPIACASRIRIETOAXADAMSIRNEYOEBUEDAVSEPSPRAOASGTETTAALNDNLASQETERSIIREEWRLSAEAYNIAUDUENEEISNTAELOEONELTISGSTGFREDYTSCSCDEEUDNRREPTRBNTJIE")
+			self.bogged=bogged("IYZEGDARESNECNLARREREOHTSLELOQCWDEFMCIKSARPBFSUATUFIDECEESTCTOTEWOEDDNAEDMPDSGETHATEEHISEHEXTVSGSSSDARRTMIICRGERNMANSRTAAEEONSIPLNEUEETORISBRCOAJELFPB")
+		else:
+			die("No dice set was selected?")
+			# Original 5x5 boggle chromosome:
+			#              111111222222333333444444555555666666777777888888999999000000111111222222333333444444555555
+			#chromosome = "AAEEEEAEEEEMAAAFRSAEEGMUADENNNAAFIRSAEGMNNCEIILTCCENSTDHHLOR"\
+			#		   + "CEILPTDDHNOTDHLNORDHLNOREIIITTCEIPSTAFIRSYBJKQXZEMOTTTFIPSSYENSSSUGORRVWIPRRRYOOOTTUNOOTUW"
+			# Original boggle chromosome:
+			#chromosome = "AAEEGNABBJOOAFFKPSACHOPSDEILRXEEINSUEEHNVWCIMOTUHIMNQUDELRVYEIOSSTHLNNRZAOOTTWEHRTVWDISTTYELRTTY"
+		if self.bogged.width == 4:
+			self.minutes= 3
+		else:
+			self.minutes= 5
+
+		for x in range(5):
+			for y in range(5):
+				if x >= self.bogged.width or y >= self.bogged.height:
+					self.grid[x][y].hide()
+				else:
+					self.grid[x][y].show()
+		self.maxscore = 0
+
+		#ROLL THE DICE!!
 		self.bogged.newgame()
+
 		for x in range(self.bogged.width):
 			for y in range(self.bogged.height):
 				if self.bogged.grid[x][y] == "Q":
 					self.grid[x][y].set_label("Qu")
 				else:
 					self.grid[x][y].set_label(self.bogged.grid[x][y])
-		self.maxscore = 0
 		for word in self.bogged.words:
 			self.maxscore += len(word) - 2
 		self.updatetext()
@@ -318,6 +366,8 @@ class gtkbogged:
 		self.score = 0
 		for word in self.words:
 			self.score += len(word) - 2
+		self.score -= self.missed
+		self.score -= self.repeats
 		if self.totalgames != 0:
 			if self.options_list["Score"].get_active():
 				average = self.totalscore/self.totalgames
@@ -368,6 +418,7 @@ class gtkbogged:
 			widget.set_sensitive(self.ingame)
 		for widget in self.options_list.itervalues():
 			widget.set_sensitive(not self.ingame)
+			widget.set_sensitive(not self.ingame)
 		#Now, make either "start game" or "add word" the default
 		if self.ingame:
 			self.entry.grab_focus()
@@ -400,31 +451,19 @@ class gtkbogged:
 	def addword(self, widget):
 		"""Add the word to the wordlist, update display of the wordlist"""
 		word=self.entry.get_text()
-		if word in self.bogged.words and word not in self.words:
-			self.words.append(word)
-			self.updatetext()
+		if word in self.bogged.words:
+			if word not in self.words:
+				self.words.append(word)
+				self.updatetext()
+			else:
+				self.repeats += 1
+		else:
+			self.missed += 1
 		self.entry.set_text("")
 
 	def clear(self, widget):
 		"""Clear the word entry box"""
 		self.entry.set_text("")
-
-	def help(self, widget):
-		"""Display a brief help window"""
-		textMessage("""Game Play:
-	Objective: Find lots of words. You'll never find ALL of them, but you can try! 
-	Rules: Start you word with any letter cube, move to any adjacent cube, and then to any cube adjacent to that one. Repeat, adding letters as you go, until your word is complete. You may not visit any one block more than once in each word. Diagonal, horizontally up, down, left, or right, are all legal. Words must be at least three letters long, and must be found in the dictionary. Plurals and alternate spellings count as a seperate word.
-
-Options:
-	Alternate Scoring: You may simply count words, or you may count points. Each word is worth it's length, minus two. So three letter words are worth 1 point, four letter words worth 2, etc.
-	Guest: Playing the game with a shoulder surfer? Want to let him play but don't want to mess up your average? Click "Guest" and any games played don't count towards your average, and aren't included in the log file.
-	Timer: You have three minutes to find all the words you can. After three minutes, the game will be automatically terminated. 
-	Found words: As part of validating your input, the computer starts each game by groveling through the dictionary, finding all possible words. If you just don't want to know, click this and that information won't be displayed, leaving you with nothing but yourself to compare against.""","Help","Introduction to pyBogged")
-
-	def about(self, widget):
-		"""Display a brief about window"""
-		textMessage("""ByBogged was written by John Gilmore between 5/17/2010 and 5/24/2010. The inspiration for the word-finding algorythm is borrowed from bogged, written in tcl/tk by Todd David Rudick. I rewrote it in python, creating a GTK user interface, Qu as one tile, guest mode, game logging for later graphing and so forth.
-	I borrowed the genetic algorythm for dice generation from some python recipes site somewhere, and added a class at the bottom to apply it to the dice set. The hard part there was coming up with a good criteria for a good set of dice. Feel free to come up with different criteria for what is good, and evolve your own set of dice.""","About","About pyBogged V1.0")
 
 	def exit(self, widget):
 		"""Display a confirmation dialogue, and quit. 
@@ -455,6 +494,10 @@ Options:
 		config.set('pyBogged','Words',repr(self.options_list["Words"].get_active()))
 		config.set('pyBogged','Misses',repr(self.options_list["Misses"].get_active()))
 		config.set('pyBogged','Repeats',repr(self.options_list["Repeats"].get_active()))
+		config.set('pyBogged','Dice Set1',repr(self.options_list["fivebyfiveoriginal"].get_active()))
+		config.set('pyBogged','Dice Set2',repr(self.options_list["fourbyfouroriginal"].get_active()))
+		config.set('pyBogged','Dice Set3',repr(self.options_list["fourbyfour"].get_active()))
+		config.set('pyBogged','Dice Set4',repr(self.options_list["fivebyfive"].get_active()))
 		config.set('RunningTotals','games',repr(self.totalgames))
 		config.set('RunningTotals','score',repr(self.totalscore))
 		config.set('RunningTotals','possiblescore',repr(self.totalpossiblescore))
@@ -489,6 +532,10 @@ Options:
 		summary+=repr(self.maxscore)
 		summary+=','
 		summary+=repr(len(self.bogged.words))
+		summary+=','
+		summary+=repr(self.missed)
+		summary+=','
+		summary+=repr(self.repeats)
 		summary+=',"'
 		summary+='","'.join(self.words)
 		summary+="\"\n"
@@ -508,12 +555,17 @@ Options:
 			self.options_list["Words"].set_active(config.getboolean('pyBogged', 'Words'))
 			self.options_list["Repeats"].set_active(config.getboolean('pyBogged', 'Repeats'))
 			self.options_list["Misses"].set_active(config.getboolean('pyBogged', 'Misses'))
+			self.options_list["Misses"].set_active(config.getboolean('pyBogged', 'Dice Set1'))
+			self.options_list["fivebyfiveoriginal"].set_active(config.getboolean('pyBogged', 'Dice Set1'))
+			self.options_list["fourbyfouroriginal"].set_active(config.getboolean('pyBogged', 'Dice Set2'))
+			self.options_list["fourbyfour"].set_active(config.getboolean('pyBogged', 'Dice Set3'))
+			self.options_list["fivebyfive"].set_active(config.getboolean('pyBogged', 'Dice Set4'))
 			self.totalgames = config.getint('RunningTotals', 'games')
 			self.totalscore = config.getint('RunningTotals', 'score')
 			self.totalpossiblescore = config.getint('RunningTotals', 'possiblescore')
 			self.totalwords = config.getint('RunningTotals', 'words')
 			self.totalpossiblewords = config.getint('RunningTotals', 'possiblewords')
-		except ConfigParser.NoSectionError:
+		except:
 			self.options_list["Timer"].set_active(False)
 			self.options_list["Score"].set_active(False)
 			self.options_list["Words"].set_active(True)
@@ -549,6 +601,8 @@ Options:
 		self.seconds  = 0
 		self.minutes  = 0
 		self.maxscore = 0
+		self.missed   = 0
+		self.repeats  = 0
 		self.disable_list = []
 		self.options_list = {}
 
@@ -584,13 +638,13 @@ Options:
 		vbox3.show()
 
 		self.grid=[]
-		for x in range(self.bogged.width):
+		for x in range(5):
 			rowbox= gtk.HBox(True, 5)
 			vbox3.add(rowbox)
 			rowbox.show()
 			self.grid.append([])
-			for y in range(self.bogged.height):
-				button = gtk.Button(self.bogged.grid[x][y])
+			for y in range(5):
+				button = gtk.Button(chr(x+y*5+ord("A")))
 				button.connect("clicked", self.gridbutton)
 				rowbox.pack_start(button, True, True, 0)
 				button.show()
@@ -639,7 +693,7 @@ Options:
 		hbox2.pack_start(check,False)
 		check.set_active(True)
 		check.show()
-		check.set_tooltip_text("Check this box for a timed game. Timer is for 3 minutes.")
+		check.set_tooltip_text("Check this box for a timed game. Timer is for 3 minutes for 4x4 games and 5 for 5x5.")
 		self.options_list["Timer"]=check
 
 		self.timercheckbox=check
@@ -687,6 +741,44 @@ Options:
 		check.set_tooltip_text("If alt. Scoring is checked, and this box is checked, a point will be deducted from you score for each word you enter that is already in the list")
 		self.options_list["Repeats"]=check
 
+		hbox2 = gtk.HBox(False,0)
+		vbox2.pack_start(hbox2,False,True,0)
+		hbox2.show()
+
+		radio=gtk.RadioButton(None, label="5x5 original")
+		hbox2.pack_start(radio,False)
+		group=radio
+		radio.set_active(False)
+		radio.show()
+		radio.set_tooltip_text("")
+		self.options_list["fivebyfiveoriginal"] = radio
+
+
+		radio=gtk.RadioButton(group, label="4x4 original")
+		hbox2.pack_start(radio,False)
+		radio.set_active(False)
+		radio.show()
+		radio.set_tooltip_text("")
+		self.options_list["fourbyfouroriginal"] = radio
+
+		hbox2 = gtk.HBox(False,0)
+		vbox2.pack_start(hbox2,False,True,0)
+		hbox2.show()
+
+		radio=gtk.RadioButton(group, label="4x4 new")
+		hbox2.pack_start(radio,False)
+		radio.set_active(False)
+		radio.show()
+		radio.set_tooltip_text("")
+		self.options_list["fourbyfour"] = radio
+
+		radio=gtk.RadioButton(group, label="5x5 new")
+		hbox2.pack_start(radio,False)
+		radio.set_active(False)
+		radio.show()
+		radio.set_tooltip_text("")
+		self.options_list["fivebyfive"] = radio
+
 
 		hbox2 = gtk.HBox(False,0)
 		vbox2.pack_start(hbox2,True,True,0)
@@ -703,18 +795,21 @@ Options:
 
 		self.label=label
 
+		scrolled_window = gtk.ScrolledWindow(hadjustment=None, vadjustment=None)
+		scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+		vbox2.pack_start(scrolled_window)
 		text=gtk.TextView()
 		text.set_editable(False)
 		text.set_wrap_mode(gtk.WRAP_WORD)
 		text.set_tooltip_text("This lists all the words you've found in this game, in alphabetical order. After you give up, you'll be shown all the words you could have found but didn't as well. They're the ones in red.")
-		vbox2.pack_start(text)
+		scrolled_window.add_with_viewport(text)
+		scrolled_window.show()
 		text.show()
 
 		tabstops=pango.TabArray(20,False)
 		for index in range(20):
 			tabstops.set_tab(index,pango.TAB_LEFT,index*pango.SCALE*60)
 		text.set_tabs(tabstops)
-
 
 		missed_tag = gtk.TextTag("missed")
 		missed_tag.set_property("foreground", "red")
@@ -755,17 +850,51 @@ Options:
 		hbox.pack_start(button, True, True, 0)
 		button.show()
 
-
 		self.load()
 		self.ingame_changed()
 		self.updatelabel()
 
 		window.show()
 
+	def help(self, widget):
+		"""Display a brief help window"""
+		textMessage("""Game Play:
+	Objective: Find lots of words. You'll never find ALL of them, but you can try! 
+	Rules: Start you word with any letter cube, move to any adjacent cube, and then to any cube adjacent to that one. Repeat, adding letters as you go, until your word is complete. You may not visit any one block more than once in each word. Diagonal, horizontally up, down, left, or right, are all legal. Words must be at least three letters long, and must be found in the dictionary. Plurals and alternate spellings count as a seperate word.
+
+Options:
+	Alternate Scoring: You may simply count words, or you may count points. Each word is worth it's length, minus two. So three letter words are worth 1 point, four letter words worth 2, etc.
+	Guest: Playing the game with a shoulder surfer? Want to let him play but don't want to mess up your average? Click "Guest" and any games played don't count towards your average, and aren't included in the log file.
+	Timer: You have three minutes to find all the words you can. After three minutes, (five for 5x5 games) the game will be automatically terminated. 
+	Found words: As part of validating your input, the computer starts each game by groveling through the dictionary, finding all possible words. If you just don't want to know, click this and that information won't be displayed, leaving you with nothing but yourself to compare against.""","Help","Introduction to pyBogged")
+
+	def about(self, widget):
+		"""Display a brief about window"""
+		textMessage("""ByBogged was written by John Gilmore between 5/17/2010 and 5/24/2010. The inspiration for the word-finding algorythm is borrowed from bogged, written in tcl/tk by Todd David Rudick. I rewrote it in python, creating a GTK user interface, Qu as one tile, guest mode, game logging for later graphing and so forth.
+	I borrowed the genetic algorythm for dice generation from some python recipes site somewhere, and added a class at the bottom to apply it to the dice set. The hard part there was coming up with a good criteria for a good set of dice. Feel free to come up with different criteria for what is good, and evolve your own set of dice.""","About","About pyBogged V1.0")
+
+
+
+def sortchromosome(c):
+	"""But a chromosome into alphabetical order (by value of dice)"""
+	def sortstr(str):
+		l=list(str)
+		l.sort()
+		return "".join(l)
+	def sortsortstr(str):
+		while str:
+			yield sortstr(str[:6])
+			str=str[6:]
+	l=list(sortsortstr(c))
+	l.sort(key=lambda p: ord(p[0])+ord(p[1])+ord(p[2])+ord(p[3])+ord(p[4])+ord(p[5]))
+
+	return "".join(l)
+
 def main():
+	random.seed()
+	gtkbogged()
 	gtk.main()
 	return 0
 
 if __name__ == "__main__":
-	gtkbogged()
 	main()
