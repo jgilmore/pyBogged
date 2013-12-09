@@ -4,6 +4,9 @@ __version__ = "1.5"
 __author__ = "John Gilmore"
 __copyright__ = "(C) 2010,2012 John Gilmore. GNU GPL v3 or later."
 __contributors__ = []
+#TODO:Tooltips for the options
+#TODO:optional funny/annoying messages on misses/repeats
+#TODO:dice with different criteria, maybe in a drop-down?
 
 #These are in the pytho9n standard library
 import ConfigParser
@@ -366,8 +369,10 @@ class gtkbogged:
 		self.score = 0
 		for word in self.words:
 			self.score += len(word) - 2
-		self.score -= self.missed
-		self.score -= self.repeats
+		if self.options_list["Misses"].get_active():
+			self.score -= self.missed
+		if self.options_list["Repeats"].get_active():
+			self.score -= self.repeats
 		if self.totalgames != 0:
 			if self.options_list["Score"].get_active():
 				average = self.totalscore/self.totalgames
@@ -555,7 +560,6 @@ class gtkbogged:
 			self.options_list["Words"].set_active(config.getboolean('pyBogged', 'Words'))
 			self.options_list["Repeats"].set_active(config.getboolean('pyBogged', 'Repeats'))
 			self.options_list["Misses"].set_active(config.getboolean('pyBogged', 'Misses'))
-			self.options_list["Misses"].set_active(config.getboolean('pyBogged', 'Dice Set1'))
 			self.options_list["fivebyfiveoriginal"].set_active(config.getboolean('pyBogged', 'Dice Set1'))
 			self.options_list["fourbyfouroriginal"].set_active(config.getboolean('pyBogged', 'Dice Set2'))
 			self.options_list["fourbyfour"].set_active(config.getboolean('pyBogged', 'Dice Set3'))
@@ -720,7 +724,7 @@ class gtkbogged:
 		hbox2.pack_start(check,False)
 		check.set_active(False)
 		check.show()
-		check.set_tooltip_text("Check this box to count \"score\" instead of simply counting workds. Each word is worth it's length, minus two. So three letter words are worth 1 point, four letter words worth 2, etc. Misses are repeated words may optionally be deducted from your score.")
+		check.set_tooltip_text("Check this box to count \"score\" instead of simply counting words. Each word is worth it's length, minus two. So three letter words are worth 1 point, four letter words worth 2, etc. Misses or repeated words may optionally be deducted from your score.")
 		self.options_list["Score"]=check
 
 		hbox2 = gtk.HBox(False,0)
@@ -750,7 +754,7 @@ class gtkbogged:
 		group=radio
 		radio.set_active(False)
 		radio.show()
-		radio.set_tooltip_text("")
+		radio.set_tooltip_text("An older style of ")
 		self.options_list["fivebyfiveoriginal"] = radio
 
 
